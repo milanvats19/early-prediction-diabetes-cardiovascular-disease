@@ -1,0 +1,4 @@
+model,accuracy,precision,recall,f1,roc_auc
+LogisticRegression,0.787,0.75,0.909,0.822,0.88
+RandomForest,0.82,0.762,0.97,0.853,0.9
+XGBoost,0.77,0.744,0.879,0.806,0.854
