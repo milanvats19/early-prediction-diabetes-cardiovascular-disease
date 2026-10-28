@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Early Risk Check — Diabetes & Heart Disease</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+  <!-- ===== Auth screen (shown when no one is logged in) ===== -->
+  <div class="auth-screen" id="authScreen">
+    <div class="auth-card">
+      <div class="brand auth-brand">
+        <span class="brand-mark">＋</span>
+        <span class="brand-name">Early&nbsp;Check</span>
+      </div>
+
+      <div class="auth-tabs">
+        <button class="auth-tab active" data-form="login" type="button">Log in</button>
+        <button class="auth-tab" data-form="signup" type="button">Sign up</button>
+      </div>
+
+      <form id="loginForm" class="auth-form">
+        <div class="field">
+          <label for="login_email">Email</label>
+          <input type="email" id="login_email" required autocomplete="email">
+        </div>
+        <div class="field">
+          <label for="login_password">Password</label>
+          <input type="password" id="login_password" required autocomplete="current-password">
+        </div>
+        <button type="submit" class="submit-btn">Log in</button>
+      </form>
+
+      <form id="signupForm" class="auth-form hidden">
+        <div class="field">
+          <label for="signup_email">Email</label>
+          <input type="email" id="signup_email" required autocomplete="email">
+        </div>
+        <div class="field">
+          <label for="signup_password">Password</label>
+          <input type="password" id="signup_password" required minlength="6" autocomplete="new-password">
+          <span class="hint">At least 6 characters</span>
+        </div>
+        <button type="submit" class="submit-btn">Create account</button>
+      </form>
+
+      <p class="auth-error hidden" id="authError"></p>
+    </div>
+  </div>
+
+  <div class="shell hidden" id="appShell">
+
+    <!-- ===== Sidebar ===== -->
+    <aside class="sidebar">
+      <div class="brand">
+        <span class="brand-mark">＋</span>
+        <span class="brand-name">Early&nbsp;Check</span>
+      </div>
+
+      <nav class="tabs" role="tablist" aria-label="Choose predictor">
+        <button class="tab active" data-panel="diabetes" role="tab" aria-selected="true">
+          Diabetes
+        </button>
+        <button class="tab" data-panel="heart" role="tab" aria-selected="false">
+          Heart&nbsp;disease
+        </button>
+      </nav>
+
+      <p class="sidebar-note">
+        Enter a few common health metrics. The model estimates risk from patterns
+        learned across thousands of prior patient records — it is a screening aid,
+        not a diagnosis.
+      </p>
+
+      <div class="sidebar-user">
+        <span id="userEmail"></span>
+        <button id="logoutBtn" class="logout-btn" type="button">Log out</button>
+      </div>
+
+      <div class="sidebar-footer">
+        <span class="dot" id="apiDot"></span>
+        <span id="apiStatus">Checking API…</span>
+      </div>
+    </aside>
+
+    <!-- ===== Main content ===== -->
+    <main class="main">
+
+      <header class="page-head">
+        <h1 id="pageTitle">Diabetes risk</h1>
+        <p id="pageSub">Based on the Pima Indians Diabetes study</p>
+      </header>
+
+      <div class="content-grid">
+
+        <!-- ---- Diabetes form ---- -->
+        <section class="panel form-panel" id="panel-diabetes">
+          <form id="diabetesForm">
+            <div class="field">
+              <label for="d_gender">Gender</label>
+              <select id="d_gender">
+                <option value="Female">Female</option>
+                <option value="Male">Male</option>
+                <option value="Other">Other</option>
+              </select>
+            </div>
+            <div class="field">
+              <label for="d_age">Age</label>
+              <input type="number" id="d_age" min="1" max="120" value="40" required>
+            </div>
+            <div class="field">
+              <label for="d_hypertension">Hypertension</label>
+              <select id="d_hypertension">
+                <option value="0">No</option>
+                <option value="1">Yes</option>
+              </select>
+            </div>
+            <div class="field">
+              <label for="d_heart_disease">Existing heart disease</label>
+              <select id="d_heart_disease">
+                <option value="0">No</option>
+                <option value="1">Yes</option>
+              </select>
+            </div>
+            <div class="field">
+              <label for="d_smoking">Smoking history</label>
+              <select id="d_smoking">
+                <option value="never">Never smoked</option>
+                <option value="No Info">Not sure / no info</option>
+                <option value="current">Current smoker</option>
+                <option value="former">Former smoker</option>
+                <option value="not current">Quit recently</option>
+                <option value="ever">Smoked at some point</option>
+              </select>
+            </div>
+            <div class="field">
+              <label for="d_bmi">BMI</label>
+              <input type="number" step="0.1" id="d_bmi" min="10" max="80" value="26.5" required>
+            </div>
+            <div class="field">
+              <label for="d_hba1c">HbA1c level (%)</label>
+              <input type="number" step="0.1" id="d_hba1c" min="3" max="15" value="5.6" required>
+              <span class="hint">Average blood sugar over 2–3 months — from a lab test</span>
+            </div>
+            <div class="field">
+              <label for="d_glucose">Blood glucose level (mg/dL)</label>
+              <input type="number" id="d_glucose" min="50" max="400" value="110" required>
+            </div>
+
+            <button type="submit" class="submit-btn">Estimate risk</button>
+          </form>
+        </section>
+
+        <!-- ---- Heart form ---- -->
+        <section class="panel form-panel hidden" id="panel-heart">
+          <form id="heartForm">
+            <div class="field">
+              <label for="h_age">Age</label>
+              <input type="number" id="h_age" min="1" max="120" value="50" required>
+            </div>
+            <div class="field">
+              <label for="h_sex">Sex</label>
+              <select id="h_sex">
+                <option value="1">Male</option>
+                <option value="0">Female</option>
+              </select>
+            </div>
+            <div class="field">
+              <label for="h_cp">Chest pain type</label>
+              <select id="h_cp">
+                <option value="0">Typical angina</option>
+                <option value="1">Atypical angina</option>
+                <option value="2">Non-anginal pain</option>
+                <option value="3">Asymptomatic</option>
+              </select>
+            </div>
+            <div class="field">
+              <label for="h_trestbps">Resting blood pressure</label>
+              <input type="number" id="h_trestbps" min="0" max="250" value="130" required>
+            </div>
+            <div class="field">
+              <label for="h_chol">Cholesterol (mg/dL)</label>
+              <input type="number" id="h_chol" min="0" max="700" value="230" required>
+            </div>
+            <div class="field">
+              <label for="h_fbs">Fasting blood sugar &gt; 120 mg/dL</label>
+              <select id="h_fbs">
+                <option value="0">No</option>
+                <option value="1">Yes</option>
+              </select>
+            </div>
+            <div class="field">
+              <label for="h_restecg">Resting ECG result</label>
+              <select id="h_restecg">
+                <option value="0">Normal</option>
+                <option value="1">ST-T abnormality</option>
+                <option value="2">Left ventricular hypertrophy</option>
+              </select>
+            </div>
+            <div class="field">
+              <label for="h_thalach">Max heart rate achieved</label>
+              <input type="number" id="h_thalach" min="0" max="250" value="150" required>
+            </div>
+            <div class="field">
+              <label for="h_exang">Exercise-induced angina</label>
+              <select id="h_exang">
+                <option value="0">No</option>
+                <option value="1">Yes</option>
+              </select>
+            </div>
+            <div class="field">
+              <label for="h_oldpeak">ST depression (oldpeak)</label>
+              <input type="number" step="0.1" id="h_oldpeak" min="0" max="10" value="1.0" required>
+            </div>
+            <div class="field">
+              <label for="h_slope">Slope of peak exercise ST</label>
+              <select id="h_slope">
+                <option value="0">Upsloping</option>
+                <option value="1">Flat</option>
+                <option value="2">Downsloping</option>
+              </select>
+            </div>
+            <div class="field">
+              <label for="h_ca">Major vessels colored (0–4)</label>
+              <input type="number" id="h_ca" min="0" max="4" value="0" required>
+            </div>
+            <div class="field">
+              <label for="h_thal">Thalassemia result</label>
+              <select id="h_thal">
+                <option value="1">Normal</option>
+                <option value="2">Fixed defect</option>
+                <option value="3">Reversible defect</option>
+              </select>
+            </div>
+
+            <button type="submit" class="submit-btn">Estimate risk</button>
+          </form>
+        </section>
+
+        <!-- ---- Results ---- -->
+        <section class="panel result-panel" id="resultPanel">
+          <div class="result-empty" id="resultEmpty">
+            <p>Fill in the form and submit to see the estimated risk here.</p>
+          </div>
+
+          <div class="result-body hidden" id="resultBody">
+            <span class="result-eyebrow" id="resultModelName">Diabetes model</span>
+            <div class="risk-dial">
+              <svg viewBox="0 0 120 70" class="dial-svg">
+                <path d="M10,60 A50,50 0 0,1 110,60" class="dial-track"/>
+                <path d="M10,60 A50,50 0 0,1 110,60" class="dial-fill" id="dialFill"/>
+              </svg>
+              <div class="dial-value" id="dialValue">--%</div>
+            </div>
+            <h2 class="risk-label" id="riskLabel">—</h2>
+            <p class="risk-copy" id="riskCopy"></p>
+
+            <div class="factors">
+              <span class="factors-title">Most influential factors</span>
+              <ul id="factorsList"></ul>
+            </div>
+          </div>
+
+          <div class="result-error hidden" id="resultError">
+            <p id="errorText">Something went wrong.</p>
+          </div>
+        </section>
+
+      </div>
+
+      <section class="panel history-panel">
+        <div class="history-head">
+          <span class="factors-title">Recent predictions</span>
+          <button id="refreshHistory" class="refresh-btn" type="button">Refresh</button>
+        </div>
+        <div id="historyEmpty" class="history-empty">No predictions saved yet.</div>
+        <table class="history-table hidden" id="historyTable">
+          <thead id="historyHead"></thead>
+          <tbody id="historyBody"></tbody>
+        </table>
+      </section>
+
+      <p class="disclaimer">
+        This tool provides an early, informational risk estimate only. It is not a
+        medical diagnosis. Please consult a qualified healthcare professional for
+        any health concerns.
+      </p>
+    </main>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>
